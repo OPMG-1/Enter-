@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enter Dash</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        #game-container {
+            margin-top: 50px;
+        }
+
+        #score {
+            font-size: 2em;
+            color: #333;
+        }
+
+        #timer {
+            font-size: 1.5em;
+            color: red;
+        }
+
+        #image {
+            margin-top: 20px;
+            width: 300px;
+            height: 300px;
+        }
+
+        #reset-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            cursor: pointer;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            display: none; /* 처음에는 안 보이도록 설정 */
+        }
+
+        #reset-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Enter Dash: 손끝 스피드 챔피언을 가려라!</h1>
+        <p>남은 시간: <span id="timer">10</span>초</p>
+        <p>점수: <span id="score">0</span></p>
+        <p>Enter 키를 빠르게 눌러 점수를 올리세요!</p>
+        <img id="image" src="image1.png" alt="이미지"> <!-- PNG 이미지 경로 -->
+        <button id="reset-btn">리셋</button> <!-- 리셋 버튼 추가 -->
+    </div>
+
+    <script>
+        let score = 0;
+        let isKeyPressed = false; 
+        let currentImage = 1;
+        let timeLeft = 10;
+        let timerStarted = false;
+        let timerInterval;
+        let gameOver = false; // 게임 종료 상태를 나타내는 변수
+        let lastKeyPressTime = 0; // 마지막으로 키가 눌린 시간을 기록
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && !gameOver) {
+                const currentTime = Date.now(); // 현재 시간을 밀리초 단위로 저장
+
+                // 키 입력이 매우 빠른 경우에도 처리하기 위해 50ms 이상의 간격을 두고 처리
+                if (currentTime - lastKeyPressTime > 50) {
+                    if (!timerStarted) {
+                        // 타이머가 시작되지 않았다면 시작
+                        timerStarted = true;
+                        timerInterval = setInterval(function() {
+                            timeLeft--;
+                            document.getElementById('timer').textContent = timeLeft;
+                            if (timeLeft <= 0) {
+                                clearInterval(timerInterval); // 타이머 정지
+                                gameOver = true; // 게임 종료 상태로 변경
+                                document.getElementById('reset-btn').style.display = 'inline'; // 리셋 버튼 표시
+                            }
+                        }, 1000); // 1000밀리초 = 1초
+                    }
+
+                    if (!isKeyPressed) {
+                        score += 10; // 점수를 10씩 증가
+                        document.getElementById('score').textContent = score;
+
+                        // 이미지 변경
+                        if (currentImage === 1) {
+                            document.getElementById('image').src = 'image2.png'; // PNG 이미지 경로
+                            currentImage = 2;
+                        } else {
+                            document.getElementById('image').src = 'image1.png'; // PNG 이미지 경로
+                            currentImage = 1;
+                        }
+
+                        lastKeyPressTime = currentTime; // 마지막 키 입력 시간 갱신
+                        isKeyPressed = true; // Enter가 눌린 상태로 변경
+                    }
+                }
+            }
+        });
+
+        document.addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                isKeyPressed = false; // Enter를 뗐을 때 상태 초기화
+            }
+        });
+
+        // 리셋 버튼 클릭 시 게임 리셋
+        document.getElementById('reset-btn').addEventListener('click', function() {
+            // 초기 상태로 리셋
+            score = 0;
+            timeLeft = 10;
+            document.getElementById('score').textContent = score;
+            document.getElementById('timer').textContent = timeLeft;
+            gameOver = false;
+            timerStarted = false;
+            document.getElementById('reset-btn').style.display = 'none'; // 리셋 버튼 숨기기
+            document.getElementById('image').src = 'image1.png'; // 이미지 초기화
+        });
+    </script>
+</body>
+</html>
